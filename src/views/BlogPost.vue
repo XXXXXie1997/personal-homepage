@@ -2,7 +2,28 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
-import hljs from 'highlight.js'
+// 按需引入 highlight.js 常用语言
+import hljs from 'highlight.js/lib/core'
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import html from 'highlight.js/lib/languages/xml'
+import css from 'highlight.js/lib/languages/css'
+import python from 'highlight.js/lib/languages/python'
+import bash from 'highlight.js/lib/languages/bash'
+import json from 'highlight.js/lib/languages/json'
+import markdown from 'highlight.js/lib/languages/markdown'
+
+// 注册语言
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('html', html)
+hljs.registerLanguage('xml', html)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('shell', bash)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('markdown', markdown)
 
 const route = useRoute()
 const router = useRouter()

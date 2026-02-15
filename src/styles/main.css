@@ -86,3 +86,39 @@ a:hover {
   background-color: var(--primary);
   color: white;
 }
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  /* 导航栏间距缩小 */
+  .tab-navigation {
+    padding: 0 16px;
+  }
+  .tab-navigation .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  /* Hero 区域调整 */
+  .hero-section {
+    padding: 60px 16px 40px;
+  }
+  .hero-section .avatar {
+    font-size: 48px;
+  }
+  .hero-section .name {
+    font-size: 24px;
+  }
+  
+  /* 博客列表调整 */
+  .blog-view {
+    padding: 80px 16px 40px;
+  }
+  .blog-card {
+    padding: 16px;
+  }
+  
+  /* 文章详情调整 */
+  .blog-post {
+    padding: 80px 16px 40px;
+  }
+}
