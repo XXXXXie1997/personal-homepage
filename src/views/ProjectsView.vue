@@ -7,14 +7,14 @@ const projects = ref([
     description: '基于 Canvas 的在线画板工具，支持绑定、画笔、橡皮擦等功能',
     tech: ['Canvas', 'JavaScript'],
     link: 'https://github.com/XXXXXie1997/canvasDrawingBoard-vite',
-    preview: 'http://60.205.128.183/canvasDrawingBoard-vite'
+    preview: 'http://www.xie-bro.top/canvasDrawingBoard-vite'
   },
   {
     name: '记账本',
     description: '纯前端记账 Web 应用，支持记账、标签管理、数据统计等功能',
     tech: ['Vue 3', 'Vant', 'ECharts'],
     link: 'https://github.com/XXXXXie1997/money-tracker-claw',
-    preview: 'http://60.205.128.183/money-tracker-claw'
+    preview: 'http://www.xie-bro.top/money-tracker-claw'
   }
 ])
 </script>
