@@ -5,9 +5,6 @@ import './styles/main.css'
 import App from './App.vue'
 import router from './router'
 
-// Import highlight.js styles
-import 'highlight.js/styles/github.css'
-
 const app = createApp(App)
 app.use(router)
 app.mount('#app')

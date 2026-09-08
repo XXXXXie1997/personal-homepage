@@ -7,7 +7,7 @@ const menuOpen = ref(false)
 
 const tabs = [
   { name: '首页', path: '/' },
-  { name: '博客', path: '/blog' },
+  { name: 'CV', path: '/cv' },
   { name: '项目', path: '/projects' }
 ]
 
@@ -32,7 +32,7 @@ const closeMenu = () => {
     <div class="nav-container">
       <router-link to="/" class="logo" @click="closeMenu">
         <span class="logo-icon">🦀</span>
-        <span class="logo-text">xxxxxie</span>
+        <span class="logo-text">xie-bro</span>
       </router-link>
       
       <!-- 桌面端导航 -->

@@ -4,7 +4,7 @@
 <template>
   <section class="hero">
     <div class="avatar">🦀</div>
-    <h1 class="name">xxxxxie</h1>
+    <h1 class="name">xie-bro</h1>
     <p class="tagline">一般路过前端开发</p>
   </section>
 </template>
