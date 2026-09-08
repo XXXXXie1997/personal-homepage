@@ -3,18 +3,51 @@ import { ref } from 'vue'
 
 const projects = ref([
   {
-    name: '画板',
-    description: '基于 Canvas 的在线画板工具，支持绑定、画笔、橡皮擦等功能',
-    tech: ['Canvas', 'JavaScript'],
-    link: 'https://github.com/XXXXXie1997/canvasDrawingBoard-vite',
-    preview: 'http://www.xie-bro.top/canvasDrawingBoard-vite'
+    name: 'ALCode AI低代码生成引擎',
+    description: '面向低代码平台的 Headless AI 生成服务，支持生成 PageDocument 与增量 Patch。',
+    tech: ['TypeScript', 'Fastify', 'AI'],
+    link: 'https://github.com/XXXXXie1997/ALCode'
+  },
+  {
+    name: 'MoUI 低代码平台',
+    description: 'Schema 驱动的低代码 UI 平台，包含组件注册、可视化编辑器、节点树、画布和属性面板。',
+    tech: ['React', 'TypeScript', 'Vite'],
+    link: 'https://github.com/XXXXXie1997/mo-ui',
+    preview: '/mo-ui/'
+  },
+  {
+    name: '日报及考勤审批系统',
+    description: '企业内部打卡、日报提交、多级审批和消息通知管理系统。',
+    tech: ['Next.js', 'Prisma', 'MySQL'],
+    link: 'https://github.com/XXXXXie1997/checkin-app',
+    preview: '/checkin-app'
   },
   {
     name: '记账本',
     description: '纯前端记账 Web 应用，支持记账、标签管理、数据统计等功能',
     tech: ['Vue 3', 'Vant', 'ECharts'],
     link: 'https://github.com/XXXXXie1997/money-tracker-claw',
-    preview: 'http://www.xie-bro.top/money-tracker-claw'
+    preview: '/money-tracker/'
+  },
+  {
+    name: '画板一张',
+    description: '基于 Canvas 的在线绘图工具，支持笔刷配置、图层操作、撤销重做和画布导出。',
+    tech: ['Vue 3', 'TypeScript', 'Canvas'],
+    link: 'https://github.com/XXXXXie1997/canvasDrawingBoard-vite',
+    preview: '/canvas-drawing-board-vite/'
+  },
+  {
+    name: 'Mo-UI 组件库',
+    description: '早期 Vue 2 UI 组件库，包含 Button、Collapse、Popover、Toast 等基础组件。',
+    tech: ['Vue 2', 'JavaScript'],
+    link: 'https://github.com/XXXXXie1997/Mo-UI-Demo1'
+  },
+  {
+    name: '任意门导航',
+    description: 'HTML、CSS、JavaScript 学习项目，实现简易导航页面的增删改查。',
+    tech: ['HTML', 'CSS', 'JavaScript'],
+    link: 'https://github.com/XXXXXie1997/guide-demo',
+    preview: '/guide-demo/'
   }
 ])
 </script>
