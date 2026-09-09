@@ -14,16 +14,6 @@
         </div>
       </section>
 
-      <!-- 个人简介 -->
-      <section class="summary">
-        <h3>个人简介</h3>
-        <div class="content">
-          <p>具备扎实的前端基础与良好的代码能力，在低代码平台、数据可视化、移动端多端开发等领域有丰富实践经验。</p>
-          <p>擅长抽象复杂业务逻辑，构建可复用的组件。注重代码质量与效率提升。</p>
-          <p>使用AI辅助开发，善于vibe coding、熟悉prompt工程和harness原理。</p>
-        </div>
-      </section>
-
       <!-- 专业技能 -->
       <section class="skills">
         <h3>专业技能</h3>
@@ -330,20 +320,6 @@ strong {
 .bio p {
   margin: 4px 0;
   font-size: 14px;
-}
-
-/* 个人简介 */
-.summary {
-  margin-bottom: 0.8em;
-}
-
-.summary .content {
-  padding: 0 4px;
-}
-
-.summary p {
-  margin-bottom: 6px;
-  line-height: 1.6;
 }
 
 /* 专业技能 */

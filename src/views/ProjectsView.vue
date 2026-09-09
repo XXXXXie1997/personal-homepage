@@ -3,6 +3,13 @@ import { ref } from 'vue'
 
 const projects = ref([
   {
+    name: 'Drawer',
+    description: '支持 Windows 和 macOS 的二维内容抽屉，可从屏幕边缘随时呼出，自由整理文本、文件、文件夹和截图，并跨应用复制或拖放取用。支持多个独立抽屉、文字编辑、画布缩放、全局快捷键和本地自动保存。',
+    tech: ['Windows', 'macOS', '桌面工具', '本地存储'],
+    link: 'https://github.com/XXXXXie1997/drawer-website',
+    website: 'http://www.xie-bro.top/drawer/'
+  },
+  {
     name: 'ALCode AI低代码生成引擎',
     description: '面向低代码平台的 Headless AI 生成服务，支持生成 PageDocument 与增量 Patch。',
     tech: ['TypeScript', 'Fastify', 'AI'],
@@ -68,6 +75,9 @@ const projects = ref([
           </a>
           <a v-if="project.preview" :href="project.preview" target="_blank" class="btn btn-primary">
             预览
+          </a>
+          <a v-if="project.website" :href="project.website" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+            官方网站
           </a>
         </div>
       </div>
