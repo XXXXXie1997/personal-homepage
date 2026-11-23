@@ -1,4 +1,11 @@
 /* Global Styles */
+@media (prefers-reduced-motion:no-preference) {
+  body.theme-changing,
+  body.theme-changing :is(.navigation,.navigation a,.theme-toggle,.profile,.profile-links,
+    .reading-panel,.reading-panel *) {
+    transition:background-color .7s ease-in-out,color .7s ease-in-out,border-color .7s ease-in-out;
+  }
+}
 body {
   background-color: var(--bg);
   color: var(--text);
@@ -8,6 +15,8 @@ body {
 }
 
 #app {
+  position: relative;
+  visibility: visible;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;

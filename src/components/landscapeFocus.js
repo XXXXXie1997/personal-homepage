@@ -39,6 +39,8 @@ export function createLandscapeFocus(renderer) {
   }
   // These working buffers are shared by all cached seasons and lighting states.
   const main=buffers(Math.min(2,renderer.capabilities.maxSamples)), mirror=buffers(0)
+  // Every animated frame overwrites the reflection; cached stills own their pixels already.
+  const reflectionTarget=new THREE.WebGLRenderTarget(1,1,{type,colorSpace:THREE.LinearSRGBColorSpace,depthBuffer:false})
   const uniforms={
     image:{value:null}, sceneDepth:{value:null}, backdropDepth:{value:null}, filtered:{value:null},
     clipRange:{value:new THREE.Vector2()}, pixel:{value:new THREE.Vector2()},
@@ -90,6 +92,7 @@ export function createLandscapeFocus(renderer) {
       #include <colorspace_fragment>
     }`)
   return {
+    reflectionTarget,
     render(scene,camera,view,focusDistance,reflection=false) {
       const {color,blur}=reflection ? mirror : main
       const output=reflection ? view.reflection : null
@@ -118,6 +121,7 @@ export function createLandscapeFocus(renderer) {
     },
     dispose() {
       for(const {color,blur} of [main,mirror]){color.dispose();blur.dispose()}
+      reflectionTarget.dispose()
       horizontal.material.dispose()
       composite.material.dispose()
       horizontal.dispose()

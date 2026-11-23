@@ -459,23 +459,39 @@ class Landscape:
                             self.leaf(root,leaf_angle,self.r.uniform(.043,.077),
                                       self.r.choice(palette),lobed=autumn)
 
-    def cabin(self,x,y,s):
+    def cabin(self,x,y,s,side_gabled,light_entrance):
         z=self.ground(x,y)-.25
-        w,d,h=2.15*s,2.65*s,1.58*s
+        w=(3.20 if side_gabled else 2.15)*s
+        d,h=2.65*s,(2.05 if side_gabled else 1.58)*s
+        span,length=(d,w) if side_gabled else (w,d)
+        ridge=z+h+span*(.32 if side_gabled else .56)
+        chimney_x=x+w*(.30 if side_gabled else .23)
+        def roof_point(across,along,height):
+            if side_gabled:
+                return (x-along,y+across,height)
+            return (x+across,y+along,height)
         self.block(x,y,z,w,d,h,"986d54")
         for side in (-1,1):
-            yy=y+side*d/2
-            self.shape([(x-w/2,yy,z+h),(x+w/2,yy,z+h),(x,yy,z+h+w*.53)],
+            end=side*length/2
+            self.shape([roof_point(-span/2,end,z+h),roof_point(span/2,end,z+h),roof_point(0,end,ridge-.03*s)],
                        [(0,1,2) if side==-1 else (2,1,0)],"a97e60")
         for side in (-1,1):
-            a=x+side*(w*.61)
-            points=[(xx,yy,zz+t) for t in (0,.12*s) for xx,zz in
-                    [(a,z+h-.12*s),(x,z+h+w*.56)] for yy in [y-d*.59,y+d*.59]]
-            self.shape(points,[(0,1,3,2),(4,6,7,5),(0,4,5,1),(1,5,7,3),(0,2,6,4)],"e1e9fa")
-        self.block(x+w*.23,y+.46*s,z+h+.25*s,.3*s,.36*s,.98*s,"825d55")
+            points=[roof_point(u,v,level+t) for t in (0,.12*s) for u,level in
+                    [(side*span*.61,z+h-.12*s),(0,ridge)] for v in (-length*.59,length*.59)]
+            faces=[(0,1,3,2),(4,6,7,5),(0,4,5,1),(1,5,7,3),(0,2,6,4)]
+            if side==1:
+                faces=[tuple(reversed(face)) for face in faces]
+            self.shape(points,faces,"e1e9fa")
+        self.block(chimney_x,y+.46*s,z+h+.25*s,.3*s,.36*s,.98*s,"825d55")
         front=y-d/2-.03
-        self.block(x-w*.17,front,z+.05,.44*s,.08,h*.7,"523f38")
-        for xx in (x+w*.22,x-w*.34):
+        door_x=x+.61*s if side_gabled else x
+        tread=.22*s
+        rise=.095*s
+        threshold=self.ground(door_x,front-3*tread)+3*rise
+        door_height=1.04*s
+        windows=(x-1.01*s,x-.38*s) if side_gabled else (x-.67*s,x+.67*s)
+        self.block(door_x,front-.055*s,threshold,.57*s,.10*s,door_height+.05*s,"523f38")
+        for xx in windows:
             self.block(xx,front-.012,z+h*.55,.38*s,.1,.45*s,"ffcf83")
             self.block(xx,front-.068,z+h*.55,.035*s,.02,.45*s,"655041")
         for offset in (-.23,.23):
@@ -488,32 +504,48 @@ class Landscape:
             self.block(x,y,height,w+.065*s,d+.065*s,.048*s,color)
         for side in (-1,1):
             self.block(x+side*w*.47,front-.045*s,z,.09*s,.1*s,h,"684c3b")
-        door_x=x-w*.17
-        self.block(door_x,front-.09*s,z+.04,.47*s,.09*s,h*.7,"695040")
-        self.block(door_x+.15*s,front-.15*s,z+h*.37,.045*s,.035*s,.055*s,"dbc28b")
-        for xx in (x+w*.22,x-w*.34):
+        self.block(door_x,front-.10*s,threshold,.47*s,.08*s,door_height,"695040")
+        self.block(door_x+.15*s,front-.15*s,threshold+door_height*.47,.045*s,.035*s,.055*s,"dbc28b")
+        for xx in windows:
             for side in (-1,1):
                 self.block(xx+side*.218*s,front-.087*s,z+h*.53,.048*s,.075*s,.50*s,"695444")
             self.block(xx,front-.1*s,z+h*.55+.21*s,.43*s,.055*s,.035*s,"6a5544")
             self.block(xx,front-.13*s,z+h*.54,.54*s,.23*s,.067*s,"d1e3ee")
         for side in (-1,1):
-            self.limb((x+side*w*.59,y-d*.59,z+h-.11*s),
-                      (x,y-d*.59,z+h+w*.56),.066*s,.063*s,"725747",8)
+            self.limb(roof_point(side*span*.59,-length*.59,z+h-.11*s),
+                      roof_point(0,-length*.59,ridge),.066*s,.063*s,"725747",8)
             for i in range(13):
-                yy=y-d*.55+i*d*1.10/12
+                along=length*(i/12-.5)*1.10
                 height=self.r.uniform(.07,.24)*s
-                self.rings(x+side*w*.61,yy,z+h-.1*s-height,
+                self.rings(*roof_point(side*span*.61,along,z+h-.1*s-height),
                            [(.004,.004,0),(.028*s,.03*s,height)],6,"c1dce6")
         for i in range(3):
-            self.block(door_x,front-(.55-.15*i)*s,z-.13+i*.085*s,
-                       (.95-.11*i)*s,.34*s,.095*s,"a59481")
-        self.block(x+w*.23,y+.46*s,z+h+1.18*s,.46*s,.52*s,.1*s,"594c46")
-        self.block(x+w*.23,y+.46*s,z+h+1.27*s,.45*s,.50*s,.055*s,"e1e7ec")
+            # Nested solid treads meet the threshold and extend into the snow.
+            depth=(3-i)*tread+.12*s
+            bottom=threshold-4*rise
+            self.block(door_x,front-depth/2,bottom,(.90-.07*i)*s,depth,(i+2)*rise,"a59481")
+        self.block(chimney_x,y+.46*s,z+h+1.18*s,.46*s,.52*s,.1*s,"594c46")
+        self.block(chimney_x,y+.46*s,z+h+1.27*s,.45*s,.50*s,.055*s,"e1e7ec")
         # A wall lantern, shielded by a metal hood.
-        lx=x+.008*s
-        lz=z+h*.77
-        self.block(lx,front-.18*s,lz,.12*s,.11*s,.19*s,"ffd589")
-        self.rings(lx,front-.18*s,lz+.18*s,[(.14*s,.12*s,0),(.035*s,.04*s,.09*s)],8,"483f38")
+        lamp_y=front-.28*s
+        lamp_base=threshold+door_height+.12*s
+        self.block(door_x,lamp_y,lamp_base,.12*s,.12*s,.16*s,"ffd589")
+        self.rings(door_x,lamp_y,lamp_base+.16*s,[(.14*s,.15*s,0),(.035*s,.04*s,.08*s)],8,"483f38")
+        if light_entrance:
+            anchor=bpy.data.objects.new("PorchLamp",None)
+            bpy.context.collection.objects.link(anchor)
+            anchor.location=(door_x,lamp_y,lamp_base+.08*s)
+            anchor["porchLamp"]=True
+        # Extra joinery should not change the village vegetation seed.
+        village_state=self.r.getstate()
+        self.block(door_x,front-.12*s,lamp_base+.16*s,.045*s,.34*s,.04*s,"483f38")
+        flue_z=z+h+1.325*s
+        self.block(chimney_x,y+.46*s,flue_z,.24*s,.26*s,.012*s,"423e3d")
+        flue=bpy.data.objects.new("ChimneyOutlet",None)
+        bpy.context.collection.objects.link(flue)
+        flue.location=(chimney_x,y+.46*s,flue_z+.012*s)
+        flue["chimneyScale"]=s
+        self.r.setstate(village_state)
 
     def finish_stones(self,name,tile,snow_faces=()):
         stones=self.finish_mesh(name,smooth=name=="Shore details",material=self.pebble)
@@ -671,7 +703,8 @@ class Landscape:
             return
         homes=[(8,1,1.4),(12,5,.98),(5,12,1.13),(-4,8,1.05),(-8,14,.9),(14,14,1.18),(-2,22,.94)]
         if self.winter:
-            for x,y,s in homes: self.cabin(x,y,s)
+            for i,(x,y,s) in enumerate(homes):
+                self.cabin(x,y,s,side_gabled=i%2==1,light_entrance=i<2)
             # Footbridge and handrails across the stream.
             y=4.5
             x=self.river(y)

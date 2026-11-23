@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CvView from '../views/CvView.vue'
 import ProjectsView from '../views/ProjectsView.vue'
@@ -25,9 +25,6 @@ const routes = [
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
-
-export default router
+export function createSiteRouter(history) {
+  return createRouter({ history, routes })
+}

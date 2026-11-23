@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { createBreeze, breezeGLSL } from './landscapeWind.js'
 import { createLighting } from './landscapeLighting.js'
+import { createChimneySmoke } from './chimneySmoke.js'
 
 import { prepareVegetation } from './vegetation.js'
 
@@ -58,7 +59,7 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
   const reflectionClip=[new THREE.Plane(new THREE.Vector3(0,1,0),.20)]
   const waterTime={value:0}
   const wind=createBreeze(waterTime)
-  const lighting=createLighting(scene,renderer)
+  const lighting=createLighting(scene,renderer,model)
   const views=new Map()
   // Keep the near bank and first row of trees or cabins inside the clear range.
   const focusDistance={spring:23,summer:22,autumn:24,winter:26}[season]
@@ -66,7 +67,7 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
   let hitWidth=0, hitHeight=0, elapsed=0, currentNight=initialNight
 
   function disposeView(view) {
-    for (const target of [view.backdrop,view.mirrorBackdrop,view.underlay,view.reflection,view.shadow]) target?.dispose()
+    for (const target of [view.backdrop,view.mirrorBackdrop,view.underlay,view.shadow]) target?.dispose()
     if (!view.canvas.isConnected) view.canvas.width=view.canvas.height=0
   }
 
@@ -89,6 +90,10 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
     vegetation=prepareVegetation(model,scene,renderer,season,wind,initialNight)
     responses=createResponses(renderer,model,season,lighting,waterTime,wind)
     particles=weather(renderer,season,initialNight,wind)
+    if (season==='winter') {
+      const smoke=createChimneySmoke(model,wind,particles.material.uniforms.night)
+      if (smoke) particles.add(smoke)
+    }
     scene.add(model,particles,responses.falling)
     lighting.sky.layers.set(1)
     const ridges=model.getObjectByName('Ridges')
@@ -169,7 +174,7 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
       backdrop:renderTarget(size.x*.60,size.y*.60,true),
       mirrorBackdrop:renderTarget(size.x*.40,size.y*.40,true),
       underlay:renderTarget(size.x,size.y),
-      reflection:renderTarget(size.x*.72,size.y*.72),
+      reflection:lens.reflectionTarget,
       present:bitmap
         ? ()=>bitmap.transferFromImageBitmap(renderer.domElement.transferToImageBitmap())
         : ()=>context.drawImage(renderer.domElement,0,0)
@@ -205,13 +210,14 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
     activeView.present()
   }
 
-  function prepare(night,width,height) {
+  async function prepare(night,width,height,current) {
     const size=renderer.getDrawingBufferSize(new THREE.Vector2())
     if (currentNight!==night) {
       lighting.apply(season,night)
-      vegetation.relight(night)
       currentNight=night
     }
+    await vegetation.relight(night,current)
+    if (!current()) return
     frameCamera(width,height)
     const uniforms=responses.water.material.uniforms
     uniforms.night.value=particles.material.uniforms.night.value=Number(night)
@@ -229,6 +235,7 @@ export function createLandscape(renderer, model, season, initialNight, lens) {
       views.set(night,view)
     }
     activeView=view
+    view.reflection.setSize(Math.max(1,Math.round(size.x*.5)),Math.max(1,Math.round(size.y*.5)))
     scene.background=view.backdrop.texture
     uniforms.underlay.value=view.underlay.texture
     uniforms.reflection.value=view.reflection.texture

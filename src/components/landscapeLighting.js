@@ -65,7 +65,7 @@ function createSky() {
   return sky
 }
 
-export function createLighting(scene, renderer) {
+export function createLighting(scene, renderer, model) {
   const sky=createSky()
   const fill=new THREE.HemisphereLight()
   const sun=new THREE.DirectionalLight()
@@ -78,13 +78,14 @@ export function createLighting(scene, renderer) {
   shadow.normalBias=.024
   shadow.radius=2
   sun.target.position.set(0,0,-7)
-  // Place the light pools just beyond the two nearest cabin entrances.
-  const porchLights=[[8,2.8,1.25],[12,2.65,-3.45]].map(([x,y,z]) => {
-    const light=new THREE.PointLight('#ffab54',12,5,2)
-    light.position.set(x,y,z)
-    return light
-  })
-  scene.add(sky,fill,sun,sun.target,...porchLights)
+  const porchLights=model.getObjectsByProperty('type','Object3D')
+    .filter(anchor=>anchor.userData.porchLamp)
+    .map(anchor=>{
+      const light=new THREE.PointLight('#ffb968',0,5,2)
+      anchor.add(light)
+      return light
+    })
+  scene.add(sky,fill,sun,sun.target)
   renderer.shadowMap.enabled=true
   renderer.shadowMap.type=THREE.PCFShadowMap
   renderer.shadowMap.autoUpdate=false
@@ -96,8 +97,7 @@ export function createLighting(scene, renderer) {
     apply(id,night) {
       const preset=seasons[id]
       for(const lamp of porchLights) {
-        lamp.visible=id==='winter'
-        lamp.intensity=night ? 10 : 3
+        lamp.intensity=night ? 3.2 : .7
       }
       const direction=night ? new THREE.Vector3(.19,.11,-1) : new THREE.Vector3(preset.x,preset.altitude,-.64)
       direction.normalize()

@@ -1,15 +1,18 @@
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
-const saved=localStorage.getItem('theme')
-const isDark=ref(saved ? saved==='dark' : matchMedia('(prefers-color-scheme: dark)').matches)
-document.body.classList.toggle('dark',isDark.value)
+const isDark=ref(false)
+let transitionTimer
 
 function toggleTheme() {
+  clearTimeout(transitionTimer)
+  document.body.classList.add('theme-changing')
   isDark.value=!isDark.value
   document.body.classList.toggle('dark',isDark.value)
-  localStorage.setItem('theme',isDark.value ? 'dark' : 'light')
+  transitionTimer=setTimeout(()=>document.body.classList.remove('theme-changing'),750)
+  try { localStorage.setItem('theme',isDark.value ? 'dark' : 'light') } catch {}
 }
 
 export function useTheme() {
+  onMounted(() => { isDark.value=document.body.classList.contains('dark') })
   return { isDark, toggleTheme }
 }

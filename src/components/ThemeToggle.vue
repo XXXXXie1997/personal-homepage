@@ -6,8 +6,7 @@ const { isDark, toggleTheme } = useTheme()
 
 <template>
   <button class="theme-toggle" @click="toggleTheme" :aria-label="isDark ? '切换到白昼' : '切换到月夜'" :title="isDark ? '切换到白昼' : '切换到月夜'">
-    <span class="icon" v-if="isDark">☀️</span>
-    <span class="icon" v-else>🌙</span>
+    <span class="icon" aria-hidden="true"></span>
   </button>
 </template>
 
@@ -30,7 +29,16 @@ const { isDark, toggleTheme } = useTheme()
 }
 
 .icon {
+  display:grid;
   font-size: 1.25rem;
   line-height: 1;
+}
+.icon::before,.icon::after {grid-area:1/1}
+.icon::before {content:'🌙';opacity:1}
+.icon::after {content:'☀️';opacity:0}
+:global(body.dark .theme-toggle .icon::before) {opacity:0}
+:global(body.dark .theme-toggle .icon::after) {opacity:1}
+@media (prefers-reduced-motion:no-preference) {
+  .icon::before,.icon::after {transition:opacity .7s ease-in-out}
 }
 </style>

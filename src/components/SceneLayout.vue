@@ -1,35 +1,70 @@
 <script setup>
-import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useTheme } from '../composables/useTheme.js'
-const SeasonLandscape = defineAsyncComponent(()=>import('./SeasonLandscape.vue'))
+import seasonDots from '../assets/dots-seasons.json'
+const SeasonLandscape = shallowRef(null)
 const { isDark } = useTheme()
 const seasons = [
-  {id:'spring', name:'春', full:'春日群山', sky:'#a4cfc4', horizon:'#f6edcf'},
-  {id:'summer', name:'夏', full:'夏日海岸', sky:'#79c8df', horizon:'#e3f6ed'},
-  {id:'autumn', name:'秋', full:'秋日峡谷', sky:'#cbb3a2', horizon:'#ffe2bf'},
-  {id:'winter', name:'冬', full:'雪落山村', sky:'#99b7d0', horizon:'#efe9de'}
+  {id:'spring', name:'春', full:'春日群山'},
+  {id:'summer', name:'夏', full:'夏日海岸'},
+  {id:'autumn', name:'秋', full:'秋日峡谷'},
+  {id:'winter', name:'冬', full:'雪落山村'}
 ]
 const season = ref(seasons[3])
 const displayed = ref(null)
 const loading = ref(true)
 const failed = ref(false)
 const retry = ref(0)
-function loadingStarted() {loading.value=true;failed.value=false}
+const preview=import.meta.env.SSR ? null : document.getElementById('scene-preview')
+const mobileQuery=import.meta.env.SSR ? null : matchMedia('(max-width: 649px)')
+const mobile=ref(mobileQuery?.matches)
+const previewKey=computed(()=>season.value.id+'-'+(isDark.value?'night':'day')+'-'+(mobile.value?'mobile':'wide'))
+function updateSize(){mobile.value=mobileQuery.matches}
+watch(previewKey, key => {
+  if (loading.value || failed.value) preview.show(key,seasonDots)
+})
+async function showPoster() {
+  loading.value=true
+  failed.value=false
+  await preview.show(previewKey.value,seasonDots)
+  if (!document.hidden) await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+}
+let importing=false
+async function loadRenderer() {
+  if (import.meta.env.SSR || SeasonLandscape.value || importing) return
+  importing=true
+  try {
+    let key
+    do {key=previewKey.value; await showPoster()} while (key!==previewKey.value)
+    SeasonLandscape.value=(await import('./SeasonLandscape.vue')).default
+  } catch {unavailable()}
+  finally {importing=false}
+}
+onMounted(()=>{
+  paused.value=matchMedia('(prefers-reduced-motion: reduce)').matches
+  mobileQuery.addEventListener('change',updateSize)
+  loadRenderer()
+})
+onBeforeUnmount(()=>mobileQuery.removeEventListener('change',updateSize))
 function presented(id) {
+  preview.stopHover()
   displayed.value=id
   loading.value=failed.value=false
 }
-function unavailable() {loading.value=false;failed.value=true}
+function unavailable() {
+  preview.show(previewKey.value,seasonDots)
+  loading.value=false
+  failed.value=true
+}
 
-const paused = ref(matchMedia('(prefers-reduced-motion: reduce)').matches)
+const paused = ref(false)
 const motionLabel = computed(() => paused.value ? '播放动态' : '暂停动态')
-const styles = computed(()=>({'--sky':season.value.sky,'--horizon':season.value.horizon}))
-const poster = id => import.meta.env.BASE_URL+'scenes/'+id+'.webp'
 function select(item) {
   if (item!==season.value) season.value=item
   else if (failed.value) retry.value++
+  loadRenderer()
 }
 
 const route = useRoute()
@@ -44,11 +79,12 @@ watch(() => route.path, () => scrollArea.value?.scrollTo({top: 0, behavior: 'ins
 </script>
 
 <template>
-  <div class="scene-layout" :class="{ reading: !home }" :style="styles">
+  <div class="scene-layout" :class="{ reading: !home, 'scene-loading': loading }">
     <div class="world">
-      <img v-if="failed && !displayed" class="poster" :src="poster(season.id)" alt="" />
-      <SeasonLandscape ref="landscape" class="landscape" :season="season.id" :paused="paused" :night="isDark" :retry="retry"
-        @ready="presented" @loading="loadingStarted" @error="unavailable" />
+      <component v-if="SeasonLandscape" :is="SeasonLandscape" ref="landscape" class="landscape"
+        :class="{presented: !loading && !failed}" :inert="loading || failed"
+        :season="season.id" :paused="paused" :night="isDark" :retry="retry" :show-poster="showPoster"
+        @ready="presented" @loading="showPoster" @error="unavailable" />
     </div>
     <div ref="scrollArea" class="page-scroll" @pointermove="brushGutter" @pointerdown="brushGutter"
       @pointerleave="landscape?.resetStroke()" @pointercancel="landscape?.resetStroke()">
@@ -73,6 +109,7 @@ watch(() => route.path, () => scrollArea.value?.scrollTo({top: 0, behavior: 'ins
           <template v-else>{{ item.name }}</template>
         </button>
       </div>
+      <span v-if="loading" class="loading-note" role="status">场景加载中，带宽有限还请稍候...</span>
     </section>
     <footer><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">蒙ICP备2024018901号-1</a></footer>
   </div>
@@ -89,16 +126,17 @@ watch(() => route.path, () => scrollArea.value?.scrollTo({top: 0, behavior: 'ins
   isolation: isolate;
 }
 .page-scroll {min-height:0;overflow-y:auto;scrollbar-gutter:stable both-edges;display:flex;flex-direction:column}
-.world {position:fixed;inset:0;z-index:-1;pointer-events:auto;background:linear-gradient(var(--sky),var(--horizon) 60%,var(--sky))}
-.poster,.landscape {position:absolute;inset:0;width:100%;height:100%}
-.poster {object-fit:cover}
+.world {position:fixed;inset:0;z-index:-1;pointer-events:auto}
+.landscape {position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .2s ease-out}
+.landscape.presented {opacity:1;transition:opacity .65s ease-in-out}
+@media (prefers-reduced-motion:reduce) {.landscape,.landscape.presented {transition:none}}
 main {flex:1;display:grid;align-items:start;pointer-events:none}
 footer {justify-self:center;margin:4px 0 max(8px,env(safe-area-inset-bottom));font-size:12px;pointer-events:none}
 footer a {pointer-events:auto;color:#fff;background:#1b303dc9;padding:3px 10px;border-radius:4px}
 .scene-dock {
   position:fixed;
   right:max(var(--dock-inset),env(safe-area-inset-right));
-  bottom:max(var(--dock-inset),env(safe-area-inset-bottom));
+  bottom:max(var(--dock-inset),calc(25px + env(safe-area-inset-bottom)));
   z-index:2;
   display:flex;
   align-items:flex-end;
@@ -144,8 +182,19 @@ footer a {pointer-events:auto;color:#fff;background:#1b303dc9;padding:3px 10px;b
 .scene-dock button:focus-visible {outline:2px solid #fff;outline-offset:2px}
 .scene-status {position:absolute;right:0;bottom:calc(100% + 6px);padding:4px 8px;white-space:nowrap;font-size:12px}
 .scene-status button {color:inherit;text-decoration:underline}
-:global(body.dark .world) {background:linear-gradient(#091326,#233654)}
-:global(body.dark .world .poster) {filter:brightness(.42) sepia(.35) hue-rotate(158deg) saturate(.78)}
+.loading-note {
+  position:absolute;top:calc(100% + 3px);right:0;white-space:nowrap;
+  padding:1px 6px;border-radius:4px;background:#1b303dd9;color:#fafaf7;
+  font-size:11px;line-height:15px;pointer-events:none;
+}
+@media (prefers-reduced-motion:no-preference) {
+  .loading-note {animation:loading-nudge 7s ease-in-out infinite}
+  @keyframes loading-nudge {
+    0%,90%,100% {transform:none}
+    93% {transform:rotate(-1.2deg)}
+    96% {transform:rotate(1deg)}
+  }
+}
 @media screen {
   .reading .page-scroll {display:grid;grid-template-rows:minmax(0,1fr);overflow:clip;scrollbar-gutter:auto}
   .reading main {min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
@@ -158,12 +207,15 @@ footer a {pointer-events:auto;color:#fff;background:#1b303dc9;padding:3px 10px;b
 @media screen and (max-width:767px), screen and (pointer:coarse) and (max-height:540px) {
   .scene-layout {
     --footer-row:24px;
-    grid-template-rows:minmax(0,1fr) calc(var(--header-height) - var(--footer-row)) var(--footer-row);
+    --note-space:0px;
+    grid-template-rows:minmax(0,1fr) calc(var(--header-height) - var(--footer-row) + var(--note-space)) var(--footer-row);
     padding-bottom:env(safe-area-inset-bottom);
   }
+  .scene-loading {--note-space:19px}
   .reading main {padding-block:calc(12px + env(safe-area-inset-bottom)) 12px}
   .reading main :deep(.reading-panel) {margin-block:0}
-  .scene-dock,.reading .scene-dock {position:relative;inset:auto;place-self:center;align-items:center;margin:0;gap:8px}
+  .scene-dock,.reading .scene-dock {position:relative;inset:auto;place-self:center;align-items:center;margin:0;gap:8px;padding-bottom:var(--note-space)}
+  .loading-note {top:auto;bottom:0;right:auto;left:0;width:100%;text-align:center}
   .chooser {grid-template:34px / repeat(4,44px);width:auto;aspect-ratio:auto;padding:2px}
   .chooser button {font-size:19px}
   .motion-toggle {width:40px;height:40px}

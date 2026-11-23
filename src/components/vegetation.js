@@ -203,11 +203,16 @@ export function prepareVegetation(root, scene, renderer, season, wind, night) {
   const previousCamera = new THREE.Matrix4()
   const proxy = new THREE.Object3D()
   return {
-    relight(night) {
-      for (const {source,painted,atlases} of batches) {
-        if (!atlases.has(night)) atlases.set(night,bakeViews(renderer,scene,source).texture)
-        painted.map=atlases.get(night)
+    async relight(night, current) {
+      for (const {source,atlases} of batches) {
+        if (atlases.has(night)) continue
+        // A cold lighting state needs four camera angles per plant template.
+        // Spread those bakes over frames while the previous scene is on screen.
+        await new Promise(resolve=>requestAnimationFrame(resolve))
+        if (!current()) return
+        atlases.set(night,bakeViews(renderer,scene,source).texture)
       }
+      for (const {painted,atlases} of batches) painted.map=atlases.get(night)
     },
     update(camera,mirrorCamera) {
       if (previousProjection.equals(camera.projectionMatrix) && previousCamera.equals(camera.matrixWorld)) return

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>四季点阵预览</title>
+<style>
+  * {box-sizing:border-box}
+  body {margin:0;background:#f5f3eb;color:#24362f;font:16px/1.5 system-ui,sans-serif}
+  main {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;padding:24px;max-width:2000px;margin:auto}
+  figure {margin:0}
+  figcaption {margin:0 0 8px;font-family:serif}
+  canvas {display:block;width:100%;height:auto}
+  @media(max-width:800px){main{grid-template-columns:1fr;padding:12px;gap:16px}}
+</style>
+<main>
+  <figure><figcaption>春 · 群山</figcaption><canvas id="spring" aria-label="群山、树林与溪流"></canvas></figure>
+  <figure><figcaption>夏 · 海岸</figcaption><canvas id="summer" aria-label="海面、沙滩与棕榈树"></canvas></figure>
+  <figure><figcaption>秋 · 峡谷</figcaption><canvas id="autumn" aria-label="岩壁之间的河流与秋林"></canvas></figure>
+  <figure><figcaption>冬 · 山村</figcaption><canvas id="winter" aria-label="雪地、针叶林与木屋"></canvas></figure>
+</main>
+<script src="./samples.js"></script>
+<script>
+  for (const [season, [cols, rows, palette, runs]] of Object.entries(samples)) {
+    const canvas = document.getElementById(season)
+    const step = 8
+    canvas.width = cols * step
+    canvas.height = rows * step
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = '#f0efe8'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.textAlign = 'center'
+    // Centre the ink itself so the glyph stays aligned across system fonts.
+    ctx.font = '32px Arial, sans-serif'
+    const glyph = '●'
+    const metrics = ctx.measureText(glyph)
+    const diameter = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight
+    const baseline = (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2
+    const inks = palette.match(/.{6}/g).map(hex => {
+      const [r,g,b] = hex.match(/../g).map(n => parseInt(n, 16))
+      const tone = (0.2126*r + 0.7152*g + 0.0722*b) / 255
+      const size = step * (0.30 + 0.80 * Math.sqrt(1 - tone))
+      const color = 'rgb(' + [r,g,b].map(n => Math.max(0, Math.round(n * 0.84 - 7))).join(',') + ')'
+      return {size, color}
+    })
+    let pos = 0
+    for (const run of atob(runs)) {
+      const byte = run.charCodeAt(0)
+      const {size, color} = inks[byte & 15]
+      const scale = size / diameter
+      ctx.fillStyle = color
+      ctx.font = (32 * scale) + 'px Arial, sans-serif'
+      for (let n = 0; n <= (byte >> 4); n++, pos++) {
+        const row = Math.floor(pos / cols)
+        const x = (pos % cols + (row % 2 ? 0.7 : 0.3)) * step
+        ctx.fillText(glyph, x, (row + 0.5) * step + baseline * scale)
+      }
+    }
+  }
+</script>
+</html>
