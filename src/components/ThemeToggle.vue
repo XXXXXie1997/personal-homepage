@@ -5,7 +5,7 @@ const { isDark, toggleTheme } = useTheme()
 </script>
 
 <template>
-  <button class="theme-toggle" @click="toggleTheme" :title="isDark ? '切换到浅色模式' : '切换到深色模式'">
+  <button class="theme-toggle" @click="toggleTheme" :aria-label="isDark ? '切换到白昼' : '切换到月夜'" :title="isDark ? '切换到白昼' : '切换到月夜'">
     <span class="icon" v-if="isDark">☀️</span>
     <span class="icon" v-else>🌙</span>
   </button>

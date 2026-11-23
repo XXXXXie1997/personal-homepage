@@ -17,44 +17,8 @@
 </template>
 
 <style scoped>
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-full);
-  background-color: var(--bg-secondary);
-  color: var(--text);
-  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
-}
-
-.social-link:hover {
-  background-color: var(--primary);
-  color: white;
-  transform: translateY(-2px);
-}
-
-.icon {
-  width: 24px;
-  height: 24px;
-}
-
-/* 掘金图标颜色 */
-.juejin-icon {
-  fill: #1E80FF;
-  transition: fill var(--transition-fast);
-}
-
-/* 深色模式下掘金图标变白 */
-:global(body.dark) .juejin-icon {
-  fill: white;
-}
+.social-links {display:flex;align-items:center;gap:13px}
+.social-link {display:grid;place-items:center;width:30px;height:36px;color:inherit}
+.social-link:hover {opacity:.65}
+.icon {width:21px;height:21px;fill:currentColor}
 </style>

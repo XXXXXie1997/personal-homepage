@@ -10,6 +10,17 @@ const projects = ref([
     website: 'http://www.xie-bro.top/drawer/'
   },
   {
+    name: '蟹小箱 · Windows 系统工具箱',
+    description: '提供系统体检、垃圾清理、磁盘分析、文件整理和启动项管理等 11 类工具。整理文件前可预览修改、检查冲突，执行后可撤销。单文件便携版支持离线使用。',
+    tech: ['C#', '.NET 10', 'WPF']
+  },
+  {
+    name: 'web-store · 虚拟商品电商平台',
+    description: '包含商城前台、管理后台和服务端 API，支持虚拟商品自动发货、会员、代理分销与多分站运营。已接入虎皮椒和易收米支付，并为多个客户独立部署。',
+    tech: ['Next.js', 'TypeScript', 'Prisma', 'MySQL', 'Tailwind CSS', 'JWT'],
+    link: 'https://github.com/XXXXXie1997/webStore'
+  },
+  {
     name: 'ALCode AI低代码生成引擎',
     description: '面向低代码平台的 Headless AI 生成服务，支持生成 PageDocument 与增量 Patch。',
     tech: ['TypeScript', 'Fastify', 'AI'],
@@ -28,6 +39,12 @@ const projects = ref([
     tech: ['Next.js', 'Prisma', 'MySQL'],
     link: 'https://github.com/XXXXXie1997/checkin-app',
     preview: '/checkin-app'
+  },
+  {
+    name: 'pulse-core · 2D 像素风俯视角 Roguelite 射击游戏',
+    description: '玩家在网格上搭建供电线路、组合模块，驱动武器并改变战斗效果。可玩原型包含房间探索、装备改造、商店、存档和局外成长。',
+    tech: ['Godot 4', 'GDScript'],
+    link: 'https://github.com/XXXXXie1997/pulse-core'
   },
   {
     name: '记账本',
@@ -60,7 +77,7 @@ const projects = ref([
 </script>
 
 <template>
-  <div class="projects-view">
+  <div class="reading-panel projects-view" role="region" aria-label="个人项目" tabindex="0">
     <h1 class="page-title">个人项目</h1>
     <div class="projects-list">
       <div v-for="project in projects" :key="project.name" class="project-card">
@@ -86,12 +103,6 @@ const projects = ref([
 </template>
 
 <style scoped>
-.projects-view {
-  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
-  max-width: var(--max-width);
-  margin: 0 auto;
-}
-
 .page-title {
   font-size: var(--font-size-2xl);
   font-weight: 700;
@@ -107,7 +118,7 @@ const projects = ref([
 
 .project-card {
   padding: var(--spacing-lg);
-  background: var(--bg-secondary);
+  background: color-mix(in srgb, var(--bg-secondary) 30%, transparent);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);

@@ -1,27 +1,82 @@
 /* Global Styles */
-html {
-  /* 预留滚动条空间，避免切换长短页面时布局横向偏移 */
-  scrollbar-gutter: stable;
-}
-
 body {
   background-color: var(--bg);
   color: var(--text);
   transition: background-color var(--transition-normal), color var(--transition-normal);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 #app {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
 /* Container */
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
+.container, .reading-panel {
+  width: min(var(--max-width), calc(100vw - 2 * clamp(20px, 4vw, 48px)));
+  margin-inline: auto;
+}
+
+.reading-panel {
+  margin-block: clamp(16px, 3vh, 32px);
+  padding: clamp(18px, 3vw, 38px);
+  pointer-events: auto;
+  border: 1px solid color-mix(in srgb, var(--bg) 60%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px #13263229;
+  --text-secondary: #455664;
+}
+
+body.dark .reading-panel {
+  --text-secondary: #c6d1d9;
+}
+
+@media screen and (forced-colors: none) {
+  .reading-panel {
+    --scroll-thumb: color-mix(in srgb, var(--text-secondary) 68%, transparent);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) transparent;
+  }
+
+  @supports selector(::-webkit-scrollbar) {
+    @media (pointer: fine) {
+      .reading-panel {
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+      .reading-panel::-webkit-scrollbar {
+        width: 12px;
+        background: transparent;
+      }
+      .reading-panel::-webkit-scrollbar-button { display: none; }
+      .reading-panel::-webkit-scrollbar-track {
+        margin-block: 10px;
+        background: transparent;
+      }
+      .reading-panel::-webkit-scrollbar-thumb {
+        min-height: 36px;
+        border: 4px solid transparent;
+        border-radius: 999px;
+        background-color: var(--scroll-thumb);
+        background-clip: padding-box;
+      }
+      .reading-panel::-webkit-scrollbar-thumb:hover {
+        border-width: 3px;
+        background-color: var(--text-secondary);
+      }
+      .reading-panel::-webkit-scrollbar-thumb:active { background-color: var(--text); }
+    }
+  }
+}
+
+@media print {
+  .reading-panel {width:100%;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;backdrop-filter:none}
+  .navigation {display:none !important}
 }
 
 /* Typography */
